@@ -2,7 +2,7 @@
 import { useMutation, useQuery, Authenticated, Unauthenticated } from "convex/react"
 import { api } from "@workspace/backend/_generated/api"
 import { Button } from "@workspace/ui/components/button";
-import { SignInButton, UserButton } from "@clerk/nextjs";
+import { OrganizationSwitcher, SignInButton, UserButton } from "@clerk/nextjs";
 
 export default function Page() {
   const users = useQuery(api.users.getMany);
@@ -20,6 +20,7 @@ export default function Page() {
               Add user
             </Button>
             <UserButton/>
+            <OrganizationSwitcher hidePersonal/>
         </div>
       </Authenticated>
       <Unauthenticated>
