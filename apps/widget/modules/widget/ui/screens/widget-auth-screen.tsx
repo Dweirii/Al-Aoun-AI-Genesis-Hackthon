@@ -60,10 +60,14 @@ export const WidgetAuthScreen = () => {
       currentUrl: window.location.href,
     };
 
+    // expire in 24 hours (timestamp in milliseconds)
+    const expiresAt = Date.now() + 1000 * 60 * 60 * 24;
+
     const contactSessionId = await createContactSession({
       ...values,
       organizationId,
       metadata,
+      expiresAt,
     });
 
     setContactSessionId(contactSessionId);
