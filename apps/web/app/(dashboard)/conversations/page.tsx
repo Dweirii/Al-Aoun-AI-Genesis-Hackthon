@@ -1,9 +1,7 @@
-const Page = () => {
-    return (
-        <div>
-            <h1>Conversations Page</h1>
-        </div>
-    );
-}
+import { ConversationsView } from "@/modules/dashboard/ui/views/conversations-view";
 
+const Page = () => {
+  return <ConversationsView />
+};
+ 
 export default Page;

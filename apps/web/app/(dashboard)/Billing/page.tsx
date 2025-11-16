@@ -1,9 +1,7 @@
-const Page = () => {
-    return (
-        <div>
-            <h1>Files Page</h1>
-        </div>
-    );
-}
+import { BillingView } from "@/modules/billing/ui/views/billing-view";
 
+const Page = () => {
+  return <BillingView />
+}
+ 
 export default Page;
