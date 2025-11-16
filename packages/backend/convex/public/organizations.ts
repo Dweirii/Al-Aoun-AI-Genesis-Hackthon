@@ -1,6 +1,7 @@
 import { createClerkClient } from "@clerk/backend";
 import { v } from "convex/values";
-import { action } from "../_generated/server";
+import { action, mutation } from "../_generated/server";
+import { internal } from "../_generated/api";
 
 const clerkClient = createClerkClient({
   secretKey: process.env.CLERK_SECRET_KEY || "",
@@ -20,5 +21,19 @@ export const validate = action({
     } else {
       return { valid: false, reason: "Organization not valid" };
     }
+  },
+});
+
+// For testing/development: Create a test subscription
+export const createTestSubscription = mutation({
+  args: {
+    organizationId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.runMutation(internal.system.subscriptions.upsert, {
+      organizationId: args.organizationId,
+      status: "active",
+    });
+    return { success: true };
   },
 });
