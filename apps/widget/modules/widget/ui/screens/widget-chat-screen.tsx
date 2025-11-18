@@ -187,18 +187,16 @@ export const WidgetChatScreen = () => {
             onLoadMore={handleLoadMore}
             ref={topElementRef}
           />
-          {toUIMessages(messages.results ?? [])?.map((uiMessage) => {
-            // Get the raw message data to access multimodal content
-            // The raw message structure has message.message.content for multimodal content
-            const rawMessage = messages.results?.find(m => m.id === uiMessage.id);
-            const messageContent = rawMessage?.message?.content ?? uiMessage.content;
+          {toUIMessages(messages.results ?? [])?.map((uiMessage, index) => {
+            // Pair UI messages with raw messages to preserve multimodal content
+            const rawMessage = messages.results?.[index];
+            const messageContent =
+              rawMessage?.message?.content ??
+              // Fallback for legacy message shape
+              (rawMessage?.message as string | undefined) ??
+              uiMessage.content;
             const parsedContent = parseMessageContent(messageContent);
-            
-            // Debug: log to see the structure (remove in production)
-            if (parsedContent.images.length > 0) {
-              console.log("Found images:", parsedContent.images, "in message:", rawMessage);
-            }
-            
+
             return (
               <AIMessage
                 from={uiMessage.role === "user" ? "user" : "assistant"}

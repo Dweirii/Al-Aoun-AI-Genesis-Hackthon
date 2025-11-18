@@ -220,13 +220,18 @@ export const ConversationIdView = ({
             onLoadMore={handleLoadMore}
             ref={topElementRef}
           />
-          {toUIMessages(messages.results ?? [])?.map((message) => {
-            const parsedContent = parseMessageContent(message.content);
+          {toUIMessages(messages.results ?? [])?.map((uiMessage, index) => {
+            const rawMessage = messages.results?.[index];
+            const messageContent =
+              rawMessage?.message?.content ??
+              (rawMessage?.message as string | undefined) ??
+              uiMessage.content;
+            const parsedContent = parseMessageContent(messageContent);
             return (
               <AIMessage
               // In reverse, because we are watching from "assistant" prespective
-                from={message.role === "user" ? "assistant" : "user"}
-                key={message.id}
+                from={uiMessage.role === "user" ? "assistant" : "user"}
+                key={uiMessage.id}
               >
                 <AIMessageContent>
                   {parsedContent.images.length > 0 && (
