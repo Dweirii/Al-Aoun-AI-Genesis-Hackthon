@@ -12,26 +12,32 @@ export function ImageDisplay({ imageUrls, className }: ImageDisplayProps) {
     return null;
   }
 
+  const gridClass = imageUrls.length === 1 
+    ? "grid-cols-1" 
+    : imageUrls.length === 2 
+    ? "grid-cols-2" 
+    : "grid-cols-2";
+
   return (
     <div
       className={cn(
-        "flex flex-col gap-2 mt-2",
-        imageUrls.length > 1 && "gap-2",
+        "grid gap-1.5 w-full mb-1",
+        gridClass,
         className
       )}
     >
       {imageUrls.map((url, index) => (
         <div
           key={index}
-          className="relative rounded-lg border border-border overflow-hidden bg-muted/50"
+          className="relative rounded-lg border border-border/50 overflow-hidden bg-muted/20"
         >
           <img
             src={url}
-            alt={`Message image ${index + 1}`}
-            className="max-w-full h-auto"
+            alt={`Image ${index + 1}`}
+            className="w-full h-auto object-cover"
             style={{
-              maxHeight: "300px",
-              objectFit: "contain",
+              maxHeight: imageUrls.length === 1 ? "180px" : "120px",
+              objectFit: "cover",
               display: "block",
             }}
             loading="lazy"

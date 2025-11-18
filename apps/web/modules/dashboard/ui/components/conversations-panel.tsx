@@ -66,7 +66,7 @@ export const ConversationsPanel = () => {
           value={statusFilter}
         >
           <SelectTrigger
-            className="h-8 border-none px-1.5 shadow-none ring-0 hover:bg-accent hover:text-accent-foreground focus-visible:ring-0"
+            className="h-8 border-none px-1.5 shadow-none ring-0 hover:bg-[#262626] focus-visible:ring-0"
           >
             <SelectValue placeholder="Filter" />
           </SelectTrigger>
@@ -119,9 +119,9 @@ export const ConversationsPanel = () => {
                 <Link
                   key={conversation._id}
                   className={cn(
-                    "relative flex cursor-pointer items-start gap-3 border-b p-4 py-5 text-sm leading-tight hover:bg-accent hover:text-accent-foreground",
+                    "relative flex cursor-pointer items-start gap-3 border-b p-4 py-5 text-sm leading-tight hover:bg-[#262626]",
                     pathname === `/conversations/${conversation._id}` &&
-                      "bg-accent text-accent-foreground"
+                      "bg-[#262626]"
                   )}
                   href={`/conversations/${conversation._id}`}
                 >
@@ -186,17 +186,17 @@ export const SkeletonConversations = () => {
         <div className="w-full space-y-2">
           {Array.from({ length: 8 }).map((_, index) => (
             <div
-              className="flex items-start gap-3 rounded-lg p-4"
+              className="flex items-start gap-3 border-b bg-[#262626] p-4 py-5"
               key={index}
             >
-              <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+              <Skeleton className="h-10 w-10 shrink-0 rounded-full bg-[#3a3a3a]" />
               <div className="min-w-0 flex-1">
                 <div className="flex w-full items-center gap-2">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="ml-auto h-3 w-12 shrink-0" />
+                  <Skeleton className="h-4 w-24 bg-[#3a3a3a]" />
+                  <Skeleton className="ml-auto h-3 w-12 shrink-0 bg-[#3a3a3a]" />
                 </div>
                 <div className="mt-2">
-                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-full bg-[#3a3a3a]" />
                 </div>
               </div>
             </div>

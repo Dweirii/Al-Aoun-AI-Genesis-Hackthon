@@ -85,7 +85,7 @@ export const AIInput = ({ className, children, ...props }: AIInputProps) => (
     style={{ padding: 0 }}
     {...props}
   >
-    <div className="relative flex items-center gap-2 rounded-3xl border border-input bg-transparent! px-3 py-1.5 shadow-sm transition-all focus-within:shadow-md focus-within:ring-1 focus-within:ring-ring/20">
+    <div className="relative flex items-center gap-2 rounded-none border border-input bg-transparent! px-3 py-1.5 shadow-sm transition-all focus-within:shadow-md focus-within:ring-1 focus-within:ring-ring/20">
       {children}
     </div>
   </form>
@@ -191,7 +191,7 @@ export const AIInputButton = ({
   return (
     <Button
       className={cn(
-        "shrink-0 gap-1.5 rounded-lg h-7 w-7",
+        "shrink-0 gap-1.5 rounded-none h-7 w-7",
         variant === "ghost" && "text-muted-foreground hover:text-foreground hover:bg-muted",
         newSize === "default" && "w-auto px-2.5 h-7",
         className
@@ -236,9 +236,9 @@ export const AIInputSubmit = ({
   return (
     <Button
       className={cn(
-        "gap-1.5 rounded-lg h-7 w-7 shrink-0",
+        "gap-1.5 rounded-none h-7 w-7 shrink-0",
         "disabled:opacity-50 disabled:cursor-not-allowed",
-        "transition-all duration-200",
+        "transition-all duration-200 text-black bg-transparent hover:bg-accent",
         isSubmitting && "opacity-70",
         className
       )}
@@ -425,7 +425,7 @@ export const AIInputWithDragDrop = ({
       onDrop={handleDrop}
       {...props}
     >
-      <div className="relative flex items-center gap-2 rounded-3xl border border-input bg-transparent! px-3 py-1.5 shadow-sm transition-all focus-within:shadow-md focus-within:ring-1 focus-within:ring-ring/20">
+      <div className="relative flex items-center gap-2 rounded-none border border-input bg-transparent! px-3 py-1.5 shadow-sm transition-all focus-within:shadow-md focus-within:ring-1 focus-within:ring-ring/20">
         {children}
       </div>
     </form>

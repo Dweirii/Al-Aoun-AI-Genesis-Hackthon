@@ -45,16 +45,15 @@ export const WidgetInboxScreen = () => {
       <WidgetHeader className="shadow-sm">
         <div className="flex items-center gap-x-2">
           <Button
-            variant="transparent"
+            variant="ghost"
             size="icon"
             onClick={() => setScreen("selection")}
-            className="hover:bg-white/20 transition-colors"
           >
             <ArrowLeftIcon className="size-5" />
           </Button>
           <div className="flex flex-col">
             <p className="font-semibold text-base">Inbox</p>
-            <p className="text-xs text-primary-foreground/80">
+            <p className="text-xs text-muted-foreground">
               {conversations?.results.length || 0} conversation{conversations?.results.length !== 1 ? 's' : ''}
             </p>
           </div>

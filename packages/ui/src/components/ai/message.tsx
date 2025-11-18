@@ -32,7 +32,7 @@ export const AIMessageContent = ({
       "flex flex-col gap-2 rounded-2xl border border-border px-4 py-3 text-sm shadow-sm",
       "bg-background text-foreground",
       "transition-all duration-200 hover:shadow-md",
-      "group-[.is-user]:rounded-tr-sm group-[.is-user]:border-transparent group-[.is-user]:bg-gradient-to-b group-[.is-user]:from-primary group-[.is-user]:to-[#0b63f3] group-[.is-user]:text-primary-foreground group-[.is-user]:shadow-md",
+      "group-[.is-user]:rounded-tr-sm group-[.is-user]:border-transparent group-[.is-user]:bg-primary group-[.is-user]:text-primary-foreground group-[.is-user]:shadow-sm",
       "group-[.is-assistant]:rounded-tl-sm",
       className
     )}

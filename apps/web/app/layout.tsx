@@ -21,15 +21,16 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="dark">
       <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased `}
         suppressHydrationWarning
       >
         <ClerkProvider
           appearance={{
+            baseTheme: "dark",
             variables: {
-              colorPrimary: "#3C82F6"
+              colorPrimary: "#0CA94C"
             }
           }}
         >

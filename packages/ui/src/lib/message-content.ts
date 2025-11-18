@@ -8,7 +8,7 @@ export interface ParsedMessageContent {
  * Handles both string content and multimodal content arrays.
  */
 export function parseMessageContent(
-  content: string | Array<{ type: string; text?: string; image?: string | URL }>
+  content: string | Array<{ type: string; text?: string; image?: string | URL; storageId?: string }>
 ): ParsedMessageContent {
   const result: ParsedMessageContent = {
     text: "",

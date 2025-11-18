@@ -31,13 +31,13 @@ export const WidgetVoiceScreen = () => {
       <WidgetHeader>
         <div className="flex items-center gap-x-2">
           <Button
-            variant="transparent"
+            variant="ghost"
             size="icon"
             onClick={() => setScreen("selection")}
           >
             <ArrowLeftIcon />
           </Button>
-          <p>Voice Chat</p>
+          <p className="font-semibold">Voice Chat</p>
         </div>
       </WidgetHeader>
       {transcript.length > 0 ? (
@@ -56,7 +56,7 @@ export const WidgetVoiceScreen = () => {
         </AIConversation>
       ) : (
         <div className="flex flex-1 h-full flex-col items-center justify-center gap-y-4">
-          <div className="flex items-center justify-center rounded-full border bg-white p-3">
+          <div className="flex items-center justify-center rounded-full border bg-muted p-3">
             <MicIcon className="size-6 text-muted-foreground" />
           </div>
           <p className="text-muted-foreground">Transcript will appear here</p>

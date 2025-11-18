@@ -125,13 +125,13 @@ export const create = mutation({
       contentParts.push({ type: "text", text: args.prompt });
     }
 
-    // Add images if provided
+    // Add images if provided - store storage IDs to regenerate URLs later
     if (args.imageStorageIds && args.imageStorageIds.length > 0) {
       for (const storageId of args.imageStorageIds) {
         const imageUrl = await ctx.storage.getUrl(storageId);
         if (imageUrl) {
-          // Store image URL as string for proper serialization
-          contentParts.push({ type: "image", image: imageUrl } as any);
+          // Store both URL and storage ID for URL regeneration
+          contentParts.push({ type: "image", image: imageUrl, storageId } as any);
         }
       }
     }
@@ -211,6 +211,36 @@ export const getMany = query({
       paginationOpts: args.paginationOpts,
     });
 
-    return paginated;
+    // Refresh image URLs for messages with images
+    const messagesWithFreshUrls = await Promise.all(
+      paginated.page.map(async (message: any) => {
+        // Check if message has multimodal content
+        if (message.message && Array.isArray(message.message.content)) {
+          const refreshedContent = await Promise.all(
+            message.message.content.map(async (part: any) => {
+              if (part.type === "image" && part.storageId) {
+                // Regenerate URL from storage ID
+                const freshUrl = await ctx.storage.getUrl(part.storageId);
+                return { ...part, image: freshUrl || part.image };
+              }
+              return part;
+            })
+          );
+          return { 
+            ...message, 
+            message: {
+              ...message.message,
+              content: refreshedContent 
+            }
+          };
+        }
+        return message;
+      })
+    );
+
+    return {
+      ...paginated,
+      page: messagesWithFreshUrls,
+    };
   },
 });

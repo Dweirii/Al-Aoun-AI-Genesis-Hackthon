@@ -33,17 +33,17 @@ export const WidgetContactScreen = () => {
       <WidgetHeader>
         <div className="flex items-center gap-x-2">
           <Button
-            variant="transparent"
+            variant="ghost"
             size="icon"
             onClick={() => setScreen("selection")}
           >
             <ArrowLeftIcon />
           </Button>
-          <p>Contact Us</p>
+          <p className="font-semibold">Contact Us</p>
         </div>
       </WidgetHeader>
       <div className="flex h-full flex-col items-center justify-center gap-y-4">
-        <div className="flex items-center justify-center rounded-full border bg-white p-3">
+        <div className="flex items-center justify-center rounded-full border bg-muted p-3">
           <PhoneIcon className="size-6 text-muted-foreground" />
         </div>
         <p className="text-muted-foreground">Available 24/7</p>

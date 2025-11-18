@@ -9,10 +9,13 @@ export const WidgetHeader = ({
 }) => {
   return (
     <header className={cn(
-      "bg-gradient-to-b from-primary to-[#0b63f3] p-4 text-primary-foreground",
+      "relative bg-card border-b border-border",
+      "after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#31AF5A]",
       className,
     )}>
-      {children}
+      <div className="px-4 py-3">
+        {children}
+      </div>
     </header>
   );
 };

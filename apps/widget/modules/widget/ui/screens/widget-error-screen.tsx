@@ -10,12 +10,12 @@ export const WidgetErrorScreen = () => {
 
   return (
     <>
-      <WidgetHeader className="shadow-sm">
-        <div className="flex flex-col justify-between gap-y-2 px-2 py-6 font-semibold animate-in fade-in-50 duration-500">
+      <WidgetHeader className="shadow-sm [&>div]:py-6">
+        <div className="flex flex-col justify-between gap-y-2 font-semibold animate-in fade-in-50 duration-500">
           <p className="text-3xl">
             Oops! 😕
           </p>
-          <p className="text-lg text-primary-foreground/90">
+          <p className="text-lg text-muted-foreground">
             Something went wrong
           </p>
         </div>

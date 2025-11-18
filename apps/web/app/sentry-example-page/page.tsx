@@ -109,12 +109,12 @@ export default function Page() {
         }
 
         a {
-          color: #6341F0;
+          color: #0CA94C;
           text-decoration: underline;
           cursor: pointer;
 
           @media (prefers-color-scheme: dark) {
-            color: #B3A1FF;
+            color: #10B981;
           }
         }
 
@@ -122,7 +122,7 @@ export default function Page() {
           border-radius: 8px;
           color: white;
           cursor: pointer;
-          background-color: #553DB8;
+          background-color: #059669;
           border: none;
           padding: 0;
           margin-top: 4px;
@@ -134,8 +134,8 @@ export default function Page() {
             font-size: 20px;
             font-weight: bold;
             line-height: 1;
-            background-color: #7553FF;
-            border: 1px solid #553DB8;
+            background-color: #0CA94C;
+            border: 1px solid #059669;
             transform: translateY(-4px);
           }
 
