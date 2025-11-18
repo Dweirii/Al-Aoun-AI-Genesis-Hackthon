@@ -13,6 +13,7 @@ export const create = action({
     prompt: v.string(),
     threadId: v.string(),
     contactSessionId: v.id("contactSessions"),
+    imageStorageIds: v.optional(v.array(v.id("_storage"))),
   },
   handler: async (ctx, args) => {
     const contactSession = await ctx.runQuery(
@@ -50,7 +51,6 @@ export const create = action({
       });
     }
 
-    // This refreshes the user's session if they are within the threshold
     await ctx.runMutation(internal.system.contactSessions.refresh, {
       contactSessionId: args.contactSessionId,
     });
@@ -62,26 +62,83 @@ export const create = action({
       },
     );
 
+  
+    const contentParts: Array<{ type: "text"; text: string } | { type: "image"; image: URL }> = [];
+    
+    if (args.prompt.trim()) {
+      contentParts.push({ type: "text", text: args.prompt });
+    }
+
+    if (args.imageStorageIds && args.imageStorageIds.length > 0) {
+      for (const storageId of args.imageStorageIds) {
+        const imageUrl = await ctx.storage.getUrl(storageId);
+        if (imageUrl) {
+          contentParts.push({ type: "image", image: new URL(imageUrl) });
+        }
+      }
+    }
+
+    // Ensure we have at least text or images
+    if (contentParts.length === 0) {
+      throw new ConvexError({
+        code: "BAD_REQUEST",
+        message: "Message must contain text or images",
+      });
+    }
+
+    // Determine message content format
+    const hasImages = contentParts.some(part => part.type === "image");
+    const messageContent = hasImages 
+      ? contentParts
+      : (contentParts[0].type === "text" ? contentParts[0].text : contentParts);
+
     const shouldTriggerAgent =
       conversation.status === "unresolved" && subscription?.status === "active"
 
     if (shouldTriggerAgent) {
-      await supportAgent.generateText(
-        ctx,
-        { threadId: args.threadId },
-        {
-          prompt: args.prompt,
-          tools: {
-            escalateConversationTool: escalateConversation,
-            resolveConversationTool: resolveConversation,
-            searchTool: search,
-          }
-        },
-      )
+      if (hasImages) {
+        const savedMessage = await saveMessage(ctx, components.agent, {
+          threadId: args.threadId,
+          message: {
+            role: "user",
+            content: messageContent as any,
+          },
+        });
+
+        await supportAgent.generateText(
+          ctx,
+          { threadId: args.threadId },
+          {
+            promptMessageId: savedMessage.messageId,
+            tools: {
+              escalateConversationTool: escalateConversation,
+              resolveConversationTool: resolveConversation,
+              searchTool: search,
+            }
+          },
+        )
+      } else {
+        // Only text - let generateText save it (avoids duplicate)
+        await supportAgent.generateText(
+          ctx,
+          { threadId: args.threadId },
+          {
+            prompt: args.prompt.trim(),
+            tools: {
+              escalateConversationTool: escalateConversation,
+              resolveConversationTool: resolveConversation,
+              searchTool: search,
+            }
+          },
+        )
+      }
     } else {
       await saveMessage(ctx, components.agent, {
         threadId: args.threadId,
-        prompt: args.prompt,
+        message: {
+          role: "user",
+          content: messageContent as any,
+        },
       });
     }
   },
@@ -108,6 +165,43 @@ export const getMany = query({
       paginationOpts: args.paginationOpts,
     });
 
-    return paginated;
+    const messagesWithFreshUrls = await Promise.all(
+      paginated.page.map(async (message: any) => {
+        if (message.message && Array.isArray(message.message.content)) {
+          const refreshedContent = await Promise.all(
+            message.message.content.map(async (part: any) => {
+              if (part.type === "image" && part.image) {
+                const imageUrl = typeof part.image === "string" ? part.image : part.image.toString();
+                const storageIdMatch = imageUrl.match(/\/api\/storage\/([^/?]+)/);
+                if (storageIdMatch) {
+                  try {
+                    const storageId = storageIdMatch[1] as any;
+                    const freshUrl = await ctx.storage.getUrl(storageId);
+                    if (freshUrl) {
+                      return { ...part, image: freshUrl };
+                    }
+                  } catch {
+                  }
+                }
+              }
+              return part;
+            })
+          );
+          return { 
+            ...message, 
+            message: {
+              ...message.message,
+              content: refreshedContent 
+            }
+          };
+        }
+        return message;
+      })
+    );
+
+    return {
+      ...paginated,
+      page: messagesWithFreshUrls,
+    };
   },
 });

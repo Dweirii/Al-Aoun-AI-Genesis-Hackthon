@@ -27,6 +27,8 @@ import {
   AIInputTextarea,
   AIInputToolbar,
   AIInputTools,
+  AIInputImageButton,
+  AIInputWithDragDrop,
 } from "@workspace/ui/components/ai/input";
 import {
   AIMessage,
@@ -34,9 +36,13 @@ import {
 } from "@workspace/ui/components/ai/message";
 import { AIResponse } from "@workspace/ui/components/ai/response";
 import { useMemo } from "react";
+import { useImageUpload } from "@workspace/ui/hooks/use-image-upload";
+import { parseMessageContent } from "@workspace/ui/lib/message-content";
+import { ImageDisplay } from "@workspace/ui/components/ai/image-display";
+import { Id } from "@workspace/backend/_generated/dataModel";
 
 const formSchema = z.object({
-  message: z.string().min(1, "Message is required"),
+  message: z.string(),
 });
 
 export const WidgetChatScreen = () => {
@@ -101,19 +107,54 @@ export const WidgetChatScreen = () => {
     },
   });
 
+  const { selectedImages, addImages, removeImage, clearImages, canAddMore, previewUrls } = useImageUpload();
+  const generateUploadUrl = useAction(api.public.files.generateUploadUrl);
+  const uploadImage = useAction(api.public.files.uploadImage);
   const createMessage = useAction(api.public.messages.create);
+  
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!conversation || !contactSessionId) {
       return;
     }
 
-    form.reset();
+    // Validate that we have either text or images
+    if (!values.message.trim() && selectedImages.length === 0) {
+      return;
+    }
 
-    await createMessage({
-      threadId: conversation.threadId,
-      prompt: values.message,
-      contactSessionId,
-    });
+    try {
+      // Upload images first
+      const imageStorageIds: Id<"_storage">[] = [];
+      
+      if (selectedImages.length > 0) {
+        for (const image of selectedImages) {
+          const uploadUrl = await generateUploadUrl();
+          const response = await fetch(uploadUrl, {
+            method: "POST",
+            headers: { "Content-Type": image.type },
+            body: image,
+          });
+          const { storageId } = await response.json();
+          
+          // Validate the uploaded image
+          const uploadResult = await uploadImage({ storageId });
+          imageStorageIds.push(uploadResult.storageId);
+        }
+      }
+
+      await createMessage({
+        threadId: conversation.threadId,
+        prompt: values.message.trim() || "",
+        contactSessionId,
+        imageStorageIds: imageStorageIds.length > 0 ? imageStorageIds : undefined,
+      });
+
+      form.reset();
+      clearImages();
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      // Error handling - could show toast notification here
+    }
   };
 
   return (
@@ -146,16 +187,32 @@ export const WidgetChatScreen = () => {
             onLoadMore={handleLoadMore}
             ref={topElementRef}
           />
-          {toUIMessages(messages.results ?? [])?.map((message) => {
+          {toUIMessages(messages.results ?? [])?.map((uiMessage) => {
+            // Get the raw message data to access multimodal content
+            // The raw message structure has message.message.content for multimodal content
+            const rawMessage = messages.results?.find(m => m.id === uiMessage.id);
+            const messageContent = rawMessage?.message?.content ?? uiMessage.content;
+            const parsedContent = parseMessageContent(messageContent);
+            
+            // Debug: log to see the structure (remove in production)
+            if (parsedContent.images.length > 0) {
+              console.log("Found images:", parsedContent.images, "in message:", rawMessage);
+            }
+            
             return (
               <AIMessage
-                from={message.role === "user" ? "user" : "assistant"}
-                key={message.id}
+                from={uiMessage.role === "user" ? "user" : "assistant"}
+                key={uiMessage.id}
               >
                 <AIMessageContent>
-                  <AIResponse>{message.content}</AIResponse>
+                  {parsedContent.images.length > 0 && (
+                    <ImageDisplay imageUrls={parsedContent.images} className="mb-2" />
+                  )}
+                  {parsedContent.text && (
+                    <AIResponse>{parsedContent.text}</AIResponse>
+                  )}
                 </AIMessageContent>
-                {message.role === "assistant" && (
+                {uiMessage.role === "assistant" && (
                   <DicebearAvatar
                     imageUrl="/logo.png"
                     seed="assistant"
@@ -192,10 +249,33 @@ export const WidgetChatScreen = () => {
         </AISuggestions>
       )}
       <Form {...form}>
-          <AIInput
+          <AIInputWithDragDrop
             className="rounded-none border-x-0 border-b-0"
             onSubmit={form.handleSubmit(onSubmit)}
+            onImageDrop={addImages}
+            dragDropEnabled={canAddMore}
           >
+            {/* Show selected images preview */}
+            {selectedImages.length > 0 && (
+              <div className="flex flex-wrap gap-2 p-2 border-b">
+                {selectedImages.map((image, idx) => (
+                  <div key={idx} className="relative">
+                    <img
+                      src={previewUrls[idx]}
+                      alt={`Preview ${idx + 1}`}
+                      className="w-16 h-16 object-cover rounded border border-border"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(idx)}
+                      className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
             <FormField
               control={form.control}
               disabled={conversation?.status === "resolved"}
@@ -220,14 +300,22 @@ export const WidgetChatScreen = () => {
               )}
             />
             <AIInputToolbar>
-              <AIInputTools />
+              <AIInputTools>
+                <AIInputImageButton
+                  onImageSelect={addImages}
+                  disabled={!canAddMore || conversation?.status === "resolved"}
+                />
+              </AIInputTools>
               <AIInputSubmit
-                disabled={conversation?.status === "resolved" || !form.formState.isValid}
+                disabled={
+                  conversation?.status === "resolved" || 
+                  (!form.formState.isValid && selectedImages.length === 0)
+                }
                 status="ready"
                 type="submit"
               />
             </AIInputToolbar>
-          </AIInput>
+          </AIInputWithDragDrop>
       </Form>
     </>
   );
