@@ -1,4 +1,4 @@
-# Al-Aoun
+# Genie
 
 A modern customer support platform with AI-powered voice and chat capabilities. Built as a monorepo with multiple apps and shared packages for managing customer conversations, integrations, and voice interactions.
 
@@ -148,7 +148,7 @@ pnpm build
 ## Project Structure
 
 ```
-al-aoun/
+Genie/
 ├── apps/
 │   ├── web/           # Main dashboard application
 │   ├── widget/        # Embeddable widget
