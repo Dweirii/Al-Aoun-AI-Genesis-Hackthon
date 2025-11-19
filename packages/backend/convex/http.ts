@@ -37,9 +37,22 @@ http.route({
         }
 
         const newMaxAllowedMemberships = subscription.status === "active" ? 5 : 1;
+        
+        // Get current organization to preserve existing metadata
+        const organization = await clerkClient.organizations.getOrganization({
+          organizationId,
+        });
+
+        // Update plan in publicMetadata based on subscription status
+        const currentMetadata = organization.publicMetadata || {};
+        const updatedMetadata = {
+          ...currentMetadata,
+          plan: subscription.status === "active" ? "pro" : null,
+        };
 
         await clerkClient.organizations.updateOrganization(organizationId, {
           maxAllowedMemberships: newMaxAllowedMemberships,
+          publicMetadata: updatedMetadata,
         });
 
         await ctx.runMutation(internal.system.subscriptions.upsert, {
